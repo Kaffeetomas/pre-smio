@@ -1,0 +1,11 @@
+<resources>
+ <color name="icon_background">#142B44</color>
+ <style name="Theme.Mio" parent="android:style/Theme.Material.Light.NoActionBar">
+  <item name="android:fontFamily">sans-serif</item>
+  <item name="android:colorAccent">#117C70</item>
+  <item name="android:windowActionModeOverlay">true</item>
+  <item name="android:windowLightStatusBar">true</item>
+  <item name="android:windowLightNavigationBar">true</item>
+  <item name="android:windowBackground">#F4F6FA</item>
+ </style>
+</resources>

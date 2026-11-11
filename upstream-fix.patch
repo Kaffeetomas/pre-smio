@@ -1,0 +1,35 @@
+diff --git a/client/socks5.go b/client/socks5.go
+index b65b4c0..37968a0 100644
+--- a/client/socks5.go
++++ b/client/socks5.go
+@@ -51,6 +51,9 @@ func (node *SOCKS5Node) dial(ctx context.Context, _, _ string, request *socks5.R
+ 	target := net.JoinHostPort(host, strconv.Itoa(dest.Port))
+ 
+ 	conn, err := node.dialer.Dial(ctx, target)
++	if err == nil && conn == nil {
++		err = fmt.Errorf("dialer returned no connection for %s", target)
++	}
+ 	if err != nil {
+ 		slog.Warn("dial failed", "dest", target, "err", err)
+ 		return nil, err
+diff --git a/protocol/dialer.go b/protocol/dialer.go
+index 6f88865..a430f71 100644
+--- a/protocol/dialer.go
++++ b/protocol/dialer.go
+@@ -88,6 +88,7 @@ func (d *Dialer) dialSelected(ctx context.Context, target string, selected trans
+ 	if err == nil || errors.Is(err, ErrConnectFailed) || ctx.Err() != nil {
+ 		return conn, err
+ 	}
++	tcpErr := err
+ 	owned := false
+ 	if session == nil || session.conn.Context().Err() != nil {
+ 		session, err = dialQUIC(ctx, d.peer)
+@@ -110,7 +111,7 @@ func (d *Dialer) dialSelected(ctx context.Context, target string, selected trans
+ 	if session.conn.Context().Err() != nil {
+ 		d.drop(session)
+ 	}
+-	return nil, err
++	return nil, errors.Join(tcpErr, quicErr)
+ }
+ 
+ func (d *Dialer) drop(session *quicSession) {
